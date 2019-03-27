@@ -8,7 +8,9 @@ import java.util.stream.Stream;
 import javax.security.auth.x500.X500Principal;
 
 import com.bbsbackend.types.LostAndFoundPost;
-
+/*
+ * save updatePost 参数保证不为空
+ */
 public class LostRepositoryMryImpl implements LostAndFoundRepository{
 	private  List<LostAndFoundPost>lostPosts	;
 	public LostRepositoryMryImpl() {
@@ -24,20 +26,29 @@ public class LostRepositoryMryImpl implements LostAndFoundRepository{
 				).collect(Collectors.toList());
 	}
 	@Override
-	public boolean publish(LostAndFoundPost post) {
+	public boolean savePost(LostAndFoundPost post) {
 		//持久化操作
-		lostPosts.add(post);
-		return true;
+		return lostPosts.add(post);
 	}
-
+	
+//到时会改成持久化操作
+	public boolean updatePost(String id,LostAndFoundPost newpost) {
+		Optional<LostAndFoundPost> post1=lostPosts.stream().filter(x->(x.getId()).equals(id)).findFirst();
+		if(post1.isPresent()&&newpost!=null) {
+			post1.get().update(newpost);
+			return true;
+		}
+		return false;
+	}
+	
 
 	@Override
-	public List<LostAndFoundPost> getAllPosts(int start,int num,boolean filter) {
+	public Stream<LostAndFoundPost> getAllPosts(int start,int num,boolean filter) {
 		if(filter==false) {
-			return lostPosts.stream().skip(start).limit(num).collect(Collectors.toList());
+			return lostPosts.stream().skip(start).limit(num);
 		}
 		else {
-			return	lostPosts.stream().filter(x->(x.getSolved())==false).skip(start).limit(num).collect(Collectors.toList()); 
+			return	lostPosts.stream().filter(x->(x.getSolved())==false).skip(start).limit(num); 
 		}
 	}
 
@@ -45,49 +56,35 @@ public class LostRepositoryMryImpl implements LostAndFoundRepository{
 	@Override
 	public boolean remove(String id) {
 		
-		lostPosts.removeIf((p)->p.getId().equals(id));
-		
-		
+		return	lostPosts.removeIf((p)->p.getId().equals(id));
+
 		//持久化删除
 		//coding...
-		return true;
 	}
 
 	
 	//要替换成数据库的搜索操作
 	@Override
-	public LostAndFoundPost searchById(String id) {
+	public Optional<LostAndFoundPost> searchById(String id) {
 		
-		Optional<LostAndFoundPost> posts=lostPosts.stream().filter(x->(x.getId()).equals(id)).findFirst();
-		return posts.orElse(null);
+		return lostPosts.stream().filter(x->(x.getId()).equals(id)).findFirst();
 	}
 	
 	
 	@Override
-	public List<LostAndFoundPost> searchByName(String obj) {
-		// TODO Auto-generated method stub
-		List<LostAndFoundPost> posts=lostPosts.stream().filter(x->(x.getObj()).equals(obj)).collect(Collectors.toList());
-		
-		return posts;
+	public Stream<LostAndFoundPost> searchByName(String obj) {
+
+		return lostPosts.stream().filter(x->(x.getObj()).equals(obj));
 	}
 
 	@Override
-	public List<LostAndFoundPost> searchByTime(String beginTime, String endTime) {
-		List<LostAndFoundPost> posts=lostPosts.stream().filter(x->(x.getTime().compareTo(beginTime)>=0)&&(x.getTime().compareTo(endTime)<=0)).collect(Collectors.toList());
-		
-		return posts;
-	}
-	@Override
-	public boolean claim(String id, String claimant) {
-		//持久化更新
-		for(LostAndFoundPost post:lostPosts) {
-			if((post.getId()).equals(id)) {
-				post.setSolved(true);
-				post.setClaimant(claimant);
-			}
-		}
-		return false;
+	public Stream<LostAndFoundPost> searchByTime(String beginTime, String endTime) {
+		return lostPosts.stream().filter(x->(x.getTime().compareTo(beginTime)>=0)&&(x.getTime().compareTo(endTime)<=0));		
 	}
 
+	public static void main(String[]args) {
+		LostRepositoryMryImpl repositoryMryImpl=new LostRepositoryMryImpl();
+		repositoryMryImpl.updatePost("002",new LostAndFoundPost("006", "作者6", "物品6", "20090106", "C13", "惨啊11", "图片地址998"));
+	}
 
 }

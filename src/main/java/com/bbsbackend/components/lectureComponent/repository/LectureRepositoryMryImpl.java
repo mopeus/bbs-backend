@@ -29,10 +29,10 @@ public class LectureRepositoryMryImpl implements LectureRepository{
 	
 	//到时要结合order和start作分页,start从0开始
 	@Override
-	public List<LecturePost> getAllLecturePost(int start,int num) {
+	public Stream<LecturePost> getAllLecturePost(int start,int num) {
 		// TODO Auto-generated method stub
 		
-		return lecturePosts.stream().skip(start).limit(num).collect(Collectors.toList());
+		return lecturePosts.stream().skip(start).limit(num);
 	}
 	@Override
 	public boolean removePost(String id) {
@@ -61,27 +61,27 @@ public class LectureRepositoryMryImpl implements LectureRepository{
 
 	//所有的Search最后都要改为数据库的方式
 	@Override
-	public LecturePost searchById(String id) {
+	public Optional<LecturePost> searchById(String id) {
 		
 		
-		Optional<LecturePost> post=lecturePosts.stream().filter(x->(x.getId()).equals(id)).findFirst();						//到时替换成数据库的搜索
-		return post.orElse(null);
+		return lecturePosts.stream().filter(x->(x.getId()).equals(id)).findFirst();						//到时替换成数据库的搜索
+		
 	}
 
 
 	@Override
-	public List<LecturePost> searchByTime(String beginTime, String endTime) {
+	public Stream<LecturePost> searchByTime(String beginTime, String endTime) {
 		// TODO Auto-generated method stub
-		List<LecturePost> posts=lecturePosts.stream().filter(x->(x.getTime().compareTo(beginTime)>=0)&&(x.getTime().compareTo(endTime)<=0)).collect(Collectors.toList());
-		return posts;
+		return lecturePosts.stream().filter(x->(x.getTime().compareTo(beginTime)>=0)&&(x.getTime().compareTo(endTime)<=0));
+		 
 	}
 
 
 	@Override
-	public List<LecturePost> searchByPresenter(String presenter) {
+	public Stream<LecturePost> searchByPresenter(String presenter) {
 		// TODO Auto-generated method stub
-		List<LecturePost> posts=lecturePosts.stream().filter(x->(x.getPresenter()).equals(presenter)).collect(Collectors.toList());
-		return posts;
+		return lecturePosts.stream().filter(x->(x.getPresenter()).equals(presenter));
+		 
 	}
 	
 
@@ -90,18 +90,16 @@ public class LectureRepositoryMryImpl implements LectureRepository{
 		LectureRepository pLectureRepository=new LectureRepositoryMryImpl();
 		pLectureRepository.addPost(new LecturePost("小陈1", "1", "20030305", "1","1", "1", "004"));
 		pLectureRepository.removePost("002");
-		List<LecturePost>p=pLectureRepository.getAllLecturePost(1,2);
+		Stream<LecturePost>p=pLectureRepository.getAllLecturePost(1,2);
 //		for(LecturePost i:p) {
 //			System.out.println(i);
 //		}
-		
+		p.forEach(System.out::println);
 		//List<LecturePost>p2=pLectureRepository.searchByPresenter("小陈1");
-		List<LecturePost>p2=pLectureRepository.searchByTime("20010103","20030304");
+		Stream<LecturePost>p2=pLectureRepository.searchByTime("20010103","20030304");
 //		LecturePost p3=pLectureRepository.searchById("003");
 //		System.out.println(p3);
-		for(LecturePost i:p2) {
-			System.out.println(i);
-		}
+		p2.forEach(System.out::println);
 		
 	}
 }

@@ -1,5 +1,6 @@
 package com.bbsbackend.components.lectureComponent;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.bbsbackend.components.lectureComponent.repository.LectureRepository;
 import com.bbsbackend.components.lectureComponent.repository.LectureRepositoryMryImpl;
+import com.bbsbackend.types.LectureInfo;
 import com.bbsbackend.types.LecturePost;
 
 /*
@@ -34,31 +36,27 @@ public class LectureComponent {
 	
 	//这个参数不知道什么
 	//start从0开始
-	public List<String> AllLecture(int start) throws Exception{
+	public Stream<String> AllLecture(int start) throws Exception{
 		if(start<0)
 			throw new Exception();
-		List<LecturePost>posts=lectureRepository.getAllLecturePost(start, number);
-		List<String>idStrings= posts.stream().map(x->x.getId()).collect(Collectors.toList());
-		return idStrings;
+		return lectureRepository.getAllLecturePost(start, number).map(x->x.getId());
 	}
 	
-	//SearchByID
-	public List<String> LectureInfo(String id){
-		LecturePost post=lectureRepository.searchById(id);
-		List<String> info=Stream.of(post.getPresenter(),post.getTitle(),post.getTime(),post.getPosition(),post.getDescription(),post.getRemark()).collect(Collectors.toList());
-		return info;
+	//SearchByID  改！！！！
+	public LectureInfo LectureInfo(String id){
+		Optional<LecturePost> post=lectureRepository.searchById(id);
+		if(post.isPresent()) {
+			return new LectureInfo(post.get());
+		}
+		return null;
 	}
 	
-	public List<String> SearchByTime(String beginTime,String endTime){
-		List<LecturePost>posts=lectureRepository.searchByTime(beginTime, endTime);
-		List<String>idList=posts.stream().map(x->x.getId()).collect(Collectors.toList());
-		return idList;
+	public Stream<String> SearchByTime(String beginTime,String endTime){
+		return lectureRepository.searchByTime(beginTime, endTime).map(x->x.getId());
 	}
 	
-	public List<String> SearchByPresenter(String presenter){
-		List<LecturePost>posts=lectureRepository.searchByPresenter(presenter);
-		List<String>idList=posts.stream().map(x->x.getId()).collect(Collectors.toList());
-		return idList;
+	public Stream<String> SearchByPresenter(String presenter){
+		return lectureRepository.searchByPresenter(presenter).map(x->x.getId());
 	}
 	
 	public boolean Remove(String id) {
@@ -70,34 +68,26 @@ public class LectureComponent {
 	public static void main(String[]args) throws Exception {
 		LectureRepository lectureRepository=new LectureRepositoryMryImpl();
 		LectureComponent lectureComponent=new LectureComponent(lectureRepository);
-		List<String> p1=lectureComponent.AllLecture(0);
-		for(String i:p1)
-			System.out.println(i);
-		
+		Stream<String> p1=lectureComponent.AllLecture(0);
+		p1.forEach(System.out::println);
 		
 		System.out.println("测试PostLecture");
 		
 		lectureComponent.PostLecture("新建作者", "新建标题", "20190314", "广州","描述嗷", "不知道什么");
 		lectureComponent.PostLecture("新建作者", "新建标题", "20190314", "广州","描述嗷2", "不知道什么2");
 		p1=lectureComponent.AllLecture(1);
-		for(String i:p1)
-			System.out.println(i);
-		
+		p1.forEach(System.out::println);
 		
 		System.out.println("测试SearchByTime");
-		List<String> ids1=lectureComponent.SearchByTime("20010103", "20190314");
-		for(String i:ids1)
-			System.out.println(i);
-		
+		Stream<String> ids1=lectureComponent.SearchByTime("20010103", "20190314");
+		ids1.forEach(System.out::println);
 		
 		System.out.println("测试SearchByPresenter");
-		List<String> ids=lectureComponent.SearchByPresenter("新建作者");
-		for(String i:ids)
-			System.out.println(i);
+		Stream<String> ids=lectureComponent.SearchByPresenter("新建作者");
+		ids.forEach(System.out::println);
 		
 		System.out.println("测试LectureInfo");
-		List<String> info=lectureComponent.LectureInfo(ids.get(0));
-		for(String i:info)
-			System.out.println(i);
+		LectureInfo info=lectureComponent.LectureInfo("004");
+		System.out.println(info);
 	}
 }

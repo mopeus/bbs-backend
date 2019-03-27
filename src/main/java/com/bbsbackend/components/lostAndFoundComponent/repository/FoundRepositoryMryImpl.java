@@ -24,22 +24,31 @@ public class FoundRepositoryMryImpl implements LostAndFoundRepository{
 				new LostAndFoundPost("007", "作者7", "物品7", "20090111", "C15", "惨啊", "图片地址7")
 				).collect(Collectors.toList());
 	}
+	
+	//持久化操作
 	@Override
-	public boolean publish(LostAndFoundPost post) {
-		//持久化操作
-		foundPosts.add(post);
-		return true;
+	public boolean savePost(LostAndFoundPost post) {
+		 return foundPosts.add(post);
 	}
 
-
+	//到时会改成持久化操作
+	public boolean updatePost(String id,LostAndFoundPost newpost) {
+		Optional<LostAndFoundPost> post1=foundPosts.stream().filter(x->(x.getId()).equals(id)).findFirst();
+		if(post1.isPresent()&&newpost!=null) {
+			post1.get().update(newpost);
+			return true;
+		}
+		return false;
+	}
+		
 	@Override
-	public List<LostAndFoundPost> getAllPosts(int start,int num,boolean filter) {
+	public Stream<LostAndFoundPost> getAllPosts(int start,int num,boolean filter) {
 		
 		if(filter==false) {
-			return foundPosts.stream().skip(start).limit(num).collect(Collectors.toList());
+			return foundPosts.stream().skip(start).limit(num);
 		}
 		else {
-			return	foundPosts.stream().filter(x->(x.getSolved())==false).skip(start).limit(num).collect(Collectors.toList()); 
+			return	foundPosts.stream().filter(x->(x.getSolved())==false).skip(start).limit(num); 
 		}
 	}
 
@@ -58,40 +67,26 @@ public class FoundRepositoryMryImpl implements LostAndFoundRepository{
 	
 	//要替换成数据库的搜索操作
 	@Override
-	public LostAndFoundPost searchById(String id) {
+	public Optional<LostAndFoundPost> searchById(String id) {
 		
-		Optional<LostAndFoundPost> posts=foundPosts.stream().filter(x->(x.getId()).equals(id)).findFirst();
-		return posts.orElse(null);
+		return foundPosts.stream().filter(x->(x.getId()).equals(id)).findFirst();
+		
 	}
 	
 	
+	//万一filter都不符合,返回空Stream
 	@Override
-	public List<LostAndFoundPost> searchByName(String obj) {
-		// TODO Auto-generated method stub
+	public Stream<LostAndFoundPost> searchByName(String obj) {
 		
-		//万一filter都不符合？
-		List<LostAndFoundPost> posts=foundPosts.stream().filter(x->(x.getObj()).equals(obj)).collect(Collectors.toList());
+		return foundPosts.stream().filter(x->(x.getObj()).equals(obj));
 		
-		return posts;
 	}
 
 	@Override
-	public List<LostAndFoundPost> searchByTime(String beginTime, String endTime) {
-		List<LostAndFoundPost> posts=foundPosts.stream().filter(x->(x.getTime().compareTo(beginTime)>=0)&&(x.getTime().compareTo(endTime)<=0)).collect(Collectors.toList());
-		
-		return posts;
+	public Stream<LostAndFoundPost> searchByTime(String beginTime, String endTime) {
+		return foundPosts.stream().filter(x->(x.getTime().compareTo(beginTime)>=0)&&(x.getTime().compareTo(endTime)<=0));
 	}
 	
-	@Override
-	public boolean claim(String id, String claimant) {
-		//持久化更新
-		for(LostAndFoundPost post:foundPosts) {
-			if((post.getId()).equals(id)) {
-				post.setSolved(true);
-				post.setClaimant(claimant);
-			}
-		}
-		return false;
-	}
+
 
 }

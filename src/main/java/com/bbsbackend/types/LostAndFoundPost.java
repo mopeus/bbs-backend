@@ -97,6 +97,18 @@ public class LostAndFoundPost {
 	public void setId(String id) {
 		this.id = id;
 	}
-	
-	
+	public void update(LostAndFoundPost newpost) {
+		this.time=newpost.getTime();
+		this.solved=newpost.getSolved();
+		this.position=newpost.getPosition();
+		this.publisher=newpost.getPublisher();
+		this.obj=newpost.getObj();
+		this.image=newpost.getImage();
+		this.description=newpost.getDescription();
+		this.contact=newpost.getContact();
+		this.claimant=newpost.getClaimant();
+	}
+	public String toString() {
+		return "id "+id+" publisher "+publisher+" obj "+obj+" time "+time+" position "+position+" description "+description+" image "+image+" solve "+solved+" cliamant "+claimant;
+	}
 }

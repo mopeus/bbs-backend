@@ -1,17 +1,19 @@
 package com.bbsbackend.components.lostAndFoundComponent.repository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.bbsbackend.types.LostAndFoundPost;
 
 public interface LostAndFoundRepository {
-	public boolean publish(LostAndFoundPost post);
+	public boolean savePost(LostAndFoundPost post);
 	
-	public List<LostAndFoundPost> getAllPosts(int start,int num,boolean filter);
+	public Stream<LostAndFoundPost> getAllPosts(int start,int num,boolean filter);
 	
-	public LostAndFoundPost searchById(String id);
-	public List<LostAndFoundPost> searchByName(String obj);
-	public List<LostAndFoundPost> searchByTime(String beginTime,String endTime);
+	public Optional<LostAndFoundPost> searchById(String id);
+	public Stream<LostAndFoundPost> searchByName(String obj);
+	public Stream<LostAndFoundPost> searchByTime(String beginTime,String endTime);
 	public boolean remove(String id);
-	public boolean claim(String id,String claimant);
+	public boolean updatePost(String id,LostAndFoundPost post);
 }
