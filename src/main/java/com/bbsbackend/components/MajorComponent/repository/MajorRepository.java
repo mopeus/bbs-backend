@@ -1,5 +1,5 @@
 package com.bbsbackend.components.MajorComponent.repository;
-S
+
 import java.util.Optional;
 import java.util.stream.Stream;
 
