@@ -42,7 +42,7 @@ public class UserComponent {
 	}
 	
 	//update
-	public boolean ChangeUserName(String id,String newusername) {
+	public boolean ChangeUserName(String id,String 	newusername) {
 		Optional<User> user=userRepository.searchUserById(id);
 		if(user.isPresent()) {
 			user.get().setName(newusername);
